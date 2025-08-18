@@ -2,6 +2,7 @@
 Représentation d'état pour le Sudoku et calcul des domaines.
 """
 from typing import List, Set, Tuple, Optional
+import random
 
 class SudokuState:
     """
@@ -158,6 +159,44 @@ class SudokuState:
         
         return mrv_cell
     
+    def get_mrv_cell_random(self, seed=None):
+        """
+        Trouve la case vide avec le plus petit domaine (MRV) avec choix aléatoire en cas d'égalité.
+        
+        Args:
+            seed: Graine pour la reproductibilité (optionnel)
+            
+        Returns:
+            (row, col) de la case MRV, ou None si plus de cases vides
+        """
+        if seed is not None:
+            random.seed(seed)
+        
+        domains = self.get_all_domains()
+        if not domains:
+            return None
+        
+        # Grouper les cases par taille de domaine
+        domain_groups = {}
+        for (row, col), domain in domains.items():
+            size = len(domain)
+            if size == 0:
+                continue  # Ignorer les domaines vides (impasses)
+            
+            if size not in domain_groups:
+                domain_groups[size] = []
+            domain_groups[size].append((row, col))
+        
+        if not domain_groups:
+            return None
+        
+        # Prendre le groupe avec la plus petite taille de domaine
+        min_domain_size = min(domain_groups.keys())
+        mrv_candidates = domain_groups[min_domain_size]
+        
+        # Choisir aléatoirement parmi les candidats
+        return random.choice(mrv_candidates)
+
     def set_cell(self, row: int, col: int, value: int) -> 'SudokuState':
         """
         Crée un nouvel état avec une case remplie.
@@ -174,14 +213,21 @@ class SudokuState:
         new_state._domains_cache = None  # Invalider le cache
         return new_state
     
-    def generate_successors(self) -> List['SudokuState']:
+    def generate_successors(self, random_mvr_cell: bool = False) -> List['SudokuState']:
         """
         Génère tous les successeurs légaux en utilisant MRV.
         
         Returns:
             Liste des états successeurs valides
         """
-        mrv_cell = self.get_mrv_cell()
+
+        if random_mvr_cell:
+            # Utiliser la méthode MRV avec choix aléatoire
+            mrv_cell = self.get_mrv_cell_random()
+        else:
+            # Utiliser la méthode MRV standard  
+            mrv_cell = self.get_mrv_cell()
+      
         if mrv_cell is None:
             return []  # Plus de cases vides
         

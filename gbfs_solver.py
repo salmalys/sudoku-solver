@@ -7,6 +7,10 @@ from typing import Optional, Callable, Dict, Any
 from dataclasses import dataclass
 
 from sudoku_state import SudokuState
+from visualization import (
+    print_verbose_step, print_successors_analysis, 
+    print_verbose_header, print_verbose_footer
+)
 
 
 @dataclass
@@ -58,7 +62,7 @@ class GBFSSolver:
     Solveur Sudoku utilisant Greedy Best First Search.
     """
     
-    def __init__(self, heuristic_function: Callable[[SudokuState], float]):
+    def __init__(self, heuristic_function: Callable[[SudokuState], float], random_mrv_cell: bool = False):
         """
         Initialise le solveur.
         
@@ -67,22 +71,29 @@ class GBFSSolver:
         """
         self.heuristic_function = heuristic_function
         self.stats = None
+        self.random_mrv_cell = random_mrv_cell 
     
-    def solve(self, initial_state: SudokuState, max_iterations: int = 100000) -> SearchStats:
+    def solve(self, initial_state: SudokuState, max_iterations: int = 100000, verbose: bool = False) -> SearchStats:
         """
         Résout le Sudoku avec GBFS.
         
         Args:
             initial_state: État initial du Sudoku
             max_iterations: Nombre maximum d'itérations pour éviter les boucles infinies
+            verbose: Si True, affiche des détails pendant la résolution
             
         Returns:
             SearchStats avec les résultats de la recherche
         """
         start_time = time.perf_counter()
         
+        if verbose:
+            print_verbose_header(initial_state, self.heuristic_function)
+        
         # Vérifier si l'état initial est déjà une solution
         if initial_state.is_goal():
+            if verbose:
+                print("État initial déjà résolu!")
             end_time = time.perf_counter()
             return SearchStats(
                 success=True,
@@ -104,6 +115,10 @@ class GBFSSolver:
         states_developed = 0
         max_open_size = 1
         
+        if verbose:
+            print(f"\nDÉBUT DE LA RECHERCHE")
+            print("-" * 50)
+        
         # Boucle principale GBFS
         iteration = 0
         while open_list and iteration < max_iterations:
@@ -120,8 +135,15 @@ class GBFSSolver:
             closed_set.add(current_state)
             states_developed += 1
             
+            # Affichage verbose
+            if verbose:
+                print_verbose_step(iteration, current_state, current_node.h, len(open_list), states_developed)
+            
             # Vérifier si on a atteint le but
             if current_state.is_goal():
+                if verbose:
+                    print_verbose_footer(True, iteration, states_developed, max_open_size, max_iterations, current_state)
+                
                 end_time = time.perf_counter()
                 return SearchStats(
                     success=True,
@@ -132,7 +154,15 @@ class GBFSSolver:
                 )
             
             # Générer les successeurs
-            successors = current_state.generate_successors()
+            successors = current_state.generate_successors(self.random_mrv_cell)
+            
+            if verbose and len(successors) == 0:
+                print(f"IMPASSE! Aucun successeur valide pour l'itération {iteration}")
+                break
+            
+            # Afficher les successeurs si verbose et peu nombreux
+            if verbose and len(successors) <= 3:
+                print_successors_analysis(current_state, successors, self.heuristic_function)
             
             for successor_state in successors:
                 # Ignorer si déjà visité
@@ -148,6 +178,9 @@ class GBFSSolver:
                 heapq.heappush(open_list, successor_node)
         
         # Échec: pas de solution trouvée
+        if verbose:
+            print_verbose_footer(False, iteration, states_developed, max_open_size, max_iterations)
+        
         end_time = time.perf_counter()
         return SearchStats(
             success=False,
@@ -159,7 +192,8 @@ class GBFSSolver:
     
     def solve_with_params(self, initial_state: SudokuState, 
                          heuristic_params: Dict[str, Any] = None,
-                         max_iterations: int = 100000) -> SearchStats:
+                         max_iterations: int = 100000, 
+                         verbose: bool = False) -> SearchStats:
         """
         Résout avec des paramètres pour l'heuristique (utile pour h3).
         
@@ -167,12 +201,13 @@ class GBFSSolver:
             initial_state: État initial
             heuristic_params: Paramètres à passer à la fonction heuristique
             max_iterations: Limite d'itérations
+            verbose: Mode verbose pour affichage détaillé
             
         Returns:
             SearchStats
         """
         if heuristic_params is None:
-            return self.solve(initial_state, max_iterations)
+            return self.solve(initial_state, max_iterations, verbose)
         
         # Sauvegarder la fonction originale AVANT de créer le wrapper
         original_function = self.heuristic_function
@@ -192,7 +227,7 @@ class GBFSSolver:
         self.heuristic_function = parameterized_heuristic
         
         try:
-            result = self.solve(initial_state, max_iterations)
+            result = self.solve(initial_state, max_iterations, verbose)
         finally:
             # Restaurer la fonction originale
             self.heuristic_function = original_function

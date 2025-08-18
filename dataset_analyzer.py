@@ -36,14 +36,14 @@ class SudokuDatasetAnalyzer:
         Returns:
             DataFrame pandas avec les données
         """
-        print("📂 Chargement du dataset...")
+        print("Chargement du dataset...")
         
         # Charger le CSV
         self.df = pd.read_csv(self.csv_path)
-        print(f"   ✅ {len(self.df)} grilles chargées")
+        print(f"   {len(self.df)} grilles chargées")
         
         # Convertir les grilles string en listes
-        print("🔄 Conversion des grilles...")
+        print("Conversion des grilles...")
         grids = []
         valid_indices = []
         
@@ -58,10 +58,10 @@ class SudokuDatasetAnalyzer:
                     grids.append(grid_list)
                     valid_indices.append(idx)
                 else:
-                    print(f"   ⚠️ Grille {idx} invalide: taille incorrecte")
+                    print(f"   Grille {idx} invalide: taille incorrecte")
                     
             except Exception as e:
-                print(f"   ❌ Erreur parsing grille {idx}: {e}")
+                print(f"   Erreur parsing grille {idx}: {e}")
         
         # Créer les SudokuState
         self.sudoku_states = []
@@ -70,13 +70,13 @@ class SudokuDatasetAnalyzer:
                 state = SudokuState(grid)
                 self.sudoku_states.append(state)
             except Exception as e:
-                print(f"   ❌ Erreur création SudokuState {valid_indices[i]}: {e}")
+                print(f"   Erreur création SudokuState {valid_indices[i]}: {e}")
                 valid_indices.remove(valid_indices[i])
         
         # Filtrer le DataFrame pour ne garder que les grilles valides
         self.df = self.df.loc[valid_indices].reset_index(drop=True)
         
-        print(f"   ✅ {len(self.sudoku_states)} SudokuStates créés avec succès")
+        print(f"   {len(self.sudoku_states)} SudokuStates créés avec succès")
         return self.df
     
     def validate_grids(self) -> Dict[str, any]:
@@ -86,7 +86,7 @@ class SudokuDatasetAnalyzer:
         Returns:
             Dictionnaire avec les résultats de validation
         """
-        print("\n🔍 VALIDATION DES GRILLES")
+        print("\nVALIDATION DES GRILLES")
         print("=" * 40)
         
         validation_results = {
@@ -120,11 +120,11 @@ class SudokuDatasetAnalyzer:
             
             if is_valid:
                 validation_results['valid_grids'] += 1
-                status = "✅"
+                status = "OK"
             else:
                 validation_results['invalid_grids'] += 1
                 validation_results['invalid_indices'].append(i)
-                status = "❌"
+                status = "KO"
             
             print(f"{status} Grille {i:3d} ({row_data['id']}): "
                   f"valide={is_valid}, cases_vides={empty_count}, "
@@ -132,7 +132,7 @@ class SudokuDatasetAnalyzer:
         
         self.analysis_results['validation'] = validation_results
         
-        print(f"\n📊 RÉSUMÉ VALIDATION:")
+        print(f"\nRÉSUMÉ VALIDATION:")
         print(f"   Total: {validation_results['total_grids']}")
         print(f"   Valides: {validation_results['valid_grids']} "
               f"({validation_results['valid_grids']/validation_results['total_grids']*100:.1f}%)")
@@ -150,7 +150,7 @@ class SudokuDatasetAnalyzer:
         Returns:
             Statistiques par niveau de difficulté
         """
-        print("\n📈 ANALYSE PAR NIVEAU DE DIFFICULTÉ")
+        print("\nANALYSE PAR NIVEAU DE DIFFICULTÉ")
         print("=" * 40)
         
         if 'validation' not in self.analysis_results:
@@ -176,7 +176,7 @@ class SudokuDatasetAnalyzer:
             
             level_stats[level] = stats
             
-            print(f"\n🎯 Niveau '{level}':")
+            print(f"\nNiveau '{level}':")
             print(f"   Nombre de grilles: {stats['count']}")
             print(f"   Pourcentage valides: {stats['valid_percentage']:.1f}%")
             print(f"   Cases vides: {stats['avg_empty_cells']:.1f} ± {stats['std_empty_cells']:.1f}")
@@ -193,7 +193,7 @@ class SudokuDatasetAnalyzer:
         Returns:
             Statistiques des valeurs heuristiques
         """
-        print("\n🧮 ANALYSE DES VALEURS HEURISTIQUES")
+        print("\nANALYSE DES VALEURS HEURISTIQUES")
         print("=" * 40)
         
         heuristic_data = []
@@ -231,13 +231,13 @@ class SudokuDatasetAnalyzer:
         heuristic_df = pd.DataFrame(heuristic_data)
         
         # Statistiques globales
-        print(f"📊 Statistiques heuristiques (sur {len(heuristic_df)} grilles valides):")
+        print(f"Statistiques heuristiques (sur {len(heuristic_df)} grilles valides):")
         print(f"   h1 (cases vides): {heuristic_df['h1'].mean():.1f} ± {heuristic_df['h1'].std():.1f}")
         print(f"   h2 (somme domaines): {heuristic_df['h2'].mean():.1f} ± {heuristic_df['h2'].std():.1f}")
         print(f"   Taille moyenne domaines: {heuristic_df['avg_domain_size'].mean():.2f}")
         
         # Par niveau de difficulté
-        print(f"\n📈 Par niveau de difficulté:")
+        print(f"\nPar niveau de difficulté:")
         for level in heuristic_df['level'].unique():
             level_data = heuristic_df[heuristic_df['level'] == level]
             print(f"   {level}: h1={level_data['h1'].mean():.1f}, "
@@ -251,7 +251,7 @@ class SudokuDatasetAnalyzer:
         """
         Crée des visualisations des analyses.
         """
-        print("\n📊 CRÉATION DES VISUALISATIONS")
+        print("\nCRÉATION DES VISUALISATIONS")
         print("=" * 30)
         
         if 'heuristics' not in self.analysis_results:
@@ -338,7 +338,7 @@ class SudokuDatasetAnalyzer:
         Args:
             n_samples: Nombre d'échantillons par niveau
         """
-        print(f"\n🔍 ÉCHANTILLONS DE GRILLES ({n_samples} par niveau)")
+        print(f"\nÉCHANTILLONS DE GRILLES ({n_samples} par niveau)")
         print("=" * 50)
         
         if 'heuristics' not in self.analysis_results:
@@ -347,7 +347,7 @@ class SudokuDatasetAnalyzer:
         heuristic_df = self.analysis_results['heuristics']
         
         for level in heuristic_df['level'].unique():
-            print(f"\n📋 Niveau '{level}':")
+            print(f"\nNiveau '{level}':")
             level_data = heuristic_df[heuristic_df['level'] == level]
             
             # Prendre quelques échantillons
@@ -359,81 +359,6 @@ class SudokuDatasetAnalyzer:
                 
                 print(f"\n   Grille {sample['id']} (h1={sample['h1']}, h2={sample['h2']}):")
                 print_state(state, f"")
-    
-    def generate_report(self) -> str:
-        """
-        Génère un rapport complet de l'analyse.
-        
-        Returns:
-            Rapport sous forme de string
-        """
-        print("\n📄 GÉNÉRATION DU RAPPORT COMPLET")
-        print("=" * 40)
-        
-        # S'assurer que toutes les analyses sont faites
-        if 'validation' not in self.analysis_results:
-            self.validate_grids()
-        if 'difficulty_levels' not in self.analysis_results:
-            self.analyze_difficulty_levels()
-        if 'heuristics' not in self.analysis_results:
-            self.analyze_heuristic_values()
-        
-        validation = self.analysis_results['validation']
-        levels = self.analysis_results['difficulty_levels']
-        heuristics = self.analysis_results['heuristics']
-        
-        report = f"""
-🧩 RAPPORT D'ANALYSE DU DATASET SUDOKU
-=====================================
-
-📊 RÉSUMÉ GÉNÉRAL
------------------
-• Total de grilles: {validation['total_grids']}
-• Grilles valides: {validation['valid_grids']} ({validation['valid_grids']/validation['total_grids']*100:.1f}%)
-• Grilles invalides: {validation['invalid_grids']}
-
-📈 ANALYSE PAR NIVEAU
---------------------"""
-        
-        for level, stats in levels.items():
-            report += f"""
-🎯 Niveau '{level}':
-   • Nombre: {stats['count']} grilles
-   • Validité: {stats['valid_percentage']:.1f}%
-   • Cases vides: {stats['avg_empty_cells']:.1f} ± {stats['std_empty_cells']:.1f}
-   • Range: [{stats['min_empty_cells']}, {stats['max_empty_cells']}]
-   • Précision givens: {stats['givens_accuracy']:.1f}%"""
-        
-        report += f"""
-
-🧮 VALEURS HEURISTIQUES
------------------------
-• h1 moyen: {heuristics['h1'].mean():.1f} ± {heuristics['h1'].std():.1f}
-• h2 moyen: {heuristics['h2'].mean():.1f} ± {heuristics['h2'].std():.1f}
-• Taille domaine moyenne: {heuristics['avg_domain_size'].mean():.2f}
-
-📋 RECOMMANDATIONS
-------------------
-"""
-        
-        if validation['invalid_grids'] > 0:
-            report += f"⚠️ {validation['invalid_grids']} grilles invalides détectées - à corriger\n"
-        
-        # Analyser la cohérence des niveaux
-        level_h1_means = heuristics.groupby('level')['h1'].mean().sort_values()
-        report += f"✅ Ordre de difficulté h1: {' < '.join(level_h1_means.index)}\n"
-        
-        report += f"""
-🎯 UTILISATION RECOMMANDÉE
--------------------------
-• Pour tests GBFS faciles: niveau '{level_h1_means.index[0]}'
-• Pour tests GBFS moyens: niveau '{level_h1_means.index[len(level_h1_means)//2] if len(level_h1_means) > 1 else level_h1_means.index[0]}'
-• Pour tests GBFS difficiles: niveau '{level_h1_means.index[-1]}'
-
-Rapport généré le {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}
-"""
-        
-        return report
 
 
 def analyze_sudoku_dataset(csv_path: str, show_samples: bool = True, 
@@ -449,7 +374,7 @@ def analyze_sudoku_dataset(csv_path: str, show_samples: bool = True,
     Returns:
         Analyseur configuré avec tous les résultats
     """
-    print("🚀 ANALYSE COMPLÈTE DU DATASET SUDOKU")
+    print("ANALYSE COMPLÈTE DU DATASET SUDOKU")
     print("=" * 50)
     
     # Créer l'analyseur
@@ -470,9 +395,5 @@ def analyze_sudoku_dataset(csv_path: str, show_samples: bool = True,
     # Créer les visualisations
     if create_plots:
         analyzer.create_visualizations()
-    
-    # Générer et afficher le rapport
-    report = analyzer.generate_report()
-    print(report)
     
     return analyzer
