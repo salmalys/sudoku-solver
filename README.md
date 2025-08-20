@@ -37,5 +37,5 @@ jupyter notebook sudoku_experiments.ipynb
 - `dataset_analyzer.py` — Chargement/analyse de datasets, stats basiques.
 - `visualization.py` — Fonctions d’affichage/graphes (optionnel).
 - `sudoku_experiments.ipynb` — Expériences (comparaisons d’heuristiques, métriques).
-- `data/` — Grilles d’entrée et éventuelles sorties.
+- `data/` — Dossier contenant le dataset de grilles de Sudoku
 - `requirements.txt` — Dépendances Python du projet.
