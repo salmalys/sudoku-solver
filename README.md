@@ -20,7 +20,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 Pour tester la résolution des grilles de Sudoku, un script interactif peut être lancé pour choisir l’heuristique, le niveau de difficulté de la grille, etc..
-````bash
+```bash
 python main.py        
 ```
 ## Notebook d’expériences
