@@ -118,22 +118,6 @@ def print_successors_analysis(current_state: SudokuState, successors: list, heur
             new_value = successor.grid[row][col]
             print(f"  -> Case ({row+1},{col+1}) = {new_value}")
             
-            # Afficher quelques lignes autour de la modification
-            print("  Extrait (3 lignes centrées):")
-            start_row = max(0, row - 1)
-            end_row = min(9, row + 2)
-            
-            for r in range(start_row, end_row):
-                line = ""
-                for c in range(9):
-                    val = successor.grid[r][c]
-                    if r == row and c == col:
-                        line += f"[{val}] "  # Mettre en évidence la nouvelle valeur
-                    else:
-                        line += f" {val if val != 0 else '.'} "
-                    if c == 2 or c == 5:
-                        line += "│ "
-                print(f"    {line}")
         else:
             # Affichage complet si pas de MRV identifiable
             print_grid(successor.grid, f"Successeur {i+1}")

@@ -259,76 +259,55 @@ class SudokuDatasetAnalyzer:
         
         heuristic_df = self.analysis_results['heuristics']
         
-        # Configuration des subplots
+        # Configuration des subplots : 2 lignes × 3 colonnes
         fig, axes = plt.subplots(2, 3, figsize=(18, 12))
         fig.suptitle('Analyse du Dataset Sudoku', fontsize=16, fontweight='bold')
-        
-        # 1. Distribution h1 par niveau
+
+        # === (1) Corrélation h1 vs h2 — en haut à gauche ============================
         for level in heuristic_df['level'].unique():
             level_data = heuristic_df[heuristic_df['level'] == level]
-            axes[0,0].hist(level_data['h1'], alpha=0.7, label=level, bins=15)
-        axes[0,0].set_xlabel('h1 (cases vides)')
-        axes[0,0].set_ylabel('Fréquence')
-        axes[0,0].set_title('Distribution h1 par niveau')
-        axes[0,0].legend()
-        
-        # 2. Distribution h2 par niveau
+            axes[0, 0].scatter(level_data['h1'], level_data['h2'], alpha=0.7, label=level)
+        axes[0, 0].set_xlabel('h1 (cases vides)')
+        axes[0, 0].set_ylabel('h2 (somme domaines)')
+        axes[0, 0].set_title('Corrélation h1 vs h2')
+        axes[0, 0].legend()
+
+        # === (2) Distribution de la taille moyenne des domaines — en haut au centre ==
         for level in heuristic_df['level'].unique():
             level_data = heuristic_df[heuristic_df['level'] == level]
-            axes[0,1].hist(level_data['h2'], alpha=0.7, label=level, bins=15)
-        axes[0,1].set_xlabel('h2 (somme domaines)')
-        axes[0,1].set_ylabel('Fréquence')
-        axes[0,1].set_title('Distribution h2 par niveau')
-        axes[0,1].legend()
-        
-        # 3. Corrélation h1 vs h2
-        for level in heuristic_df['level'].unique():
-            level_data = heuristic_df[heuristic_df['level'] == level]
-            axes[0,2].scatter(level_data['h1'], level_data['h2'], alpha=0.7, label=level)
-        axes[0,2].set_xlabel('h1 (cases vides)')
-        axes[0,2].set_ylabel('h2 (somme domaines)')
-        axes[0,2].set_title('Corrélation h1 vs h2')
-        axes[0,2].legend()
-        
-        # 4. Boxplot h1 par niveau
-        levels = heuristic_df['level'].unique()
-        h1_by_level = [heuristic_df[heuristic_df['level'] == level]['h1'] for level in levels]
-        axes[1,0].boxplot(h1_by_level, labels=levels)
-        axes[1,0].set_ylabel('h1 (cases vides)')
-        axes[1,0].set_title('h1 par niveau (boxplot)')
-        axes[1,0].tick_params(axis='x', rotation=45)
-        
-        # 5. Taille moyenne des domaines
-        for level in heuristic_df['level'].unique():
-            level_data = heuristic_df[heuristic_df['level'] == level]
-            axes[1,1].hist(level_data['avg_domain_size'], alpha=0.7, label=level, bins=15)
-        axes[1,1].set_xlabel('Taille moyenne des domaines')
-        axes[1,1].set_ylabel('Fréquence')
-        axes[1,1].set_title('Distribution taille moyenne domaines')
-        axes[1,1].legend()
-        
-        # 6. Statistiques par niveau (barplot)
-        level_summary = heuristic_df.groupby('level').agg({
-            'h1': 'mean',
-            'h2': 'mean',
-            'avg_domain_size': 'mean'
-        })
-        
+            axes[0, 1].hist(level_data['avg_domain_size'], alpha=0.7, label=level, bins=15)
+        axes[0, 1].set_xlabel('Taille moyenne des domaines')
+        axes[0, 1].set_ylabel('Fréquence')
+        axes[0, 1].set_title('Distribution taille moyenne des domaines')
+        axes[0, 1].legend()
+
+        # === (3) Moyennes par niveau — en haut à droite =============================
+        level_summary = (
+            heuristic_df
+            .groupby('level')
+            .agg({'h1': 'mean', 'h2': 'mean', 'avg_domain_size': 'mean'})
+            .sort_index()
+        )
         x = np.arange(len(level_summary))
-        width = 0.25
-        
-        axes[1,2].bar(x - width, level_summary['h1'], width, label='h1 (norm)', alpha=0.8)
-        axes[1,2].bar(x, level_summary['h2']/10, width, label='h2/10', alpha=0.8)  # Normalisé pour visibilité
-        axes[1,2].bar(x + width, level_summary['avg_domain_size'], width, label='avg_domain', alpha=0.8)
-        
-        axes[1,2].set_xlabel('Niveau de difficulté')
-        axes[1,2].set_ylabel('Valeur moyenne')
-        axes[1,2].set_title('Moyennes par niveau')
-        axes[1,2].set_xticks(x)
-        axes[1,2].set_xticklabels(level_summary.index, rotation=45)
-        axes[1,2].legend()
-        
-        plt.tight_layout()
+        width = 0.28
+
+        axes[0, 2].bar(x - width, level_summary['h1'].values, width, label='h1 (norm)', alpha=0.85)
+        axes[0, 2].bar(x,         (level_summary['h2'] / 10).values, width, label='h2/10', alpha=0.85)  # normalisation visuelle
+        axes[0, 2].bar(x + width, level_summary['avg_domain_size'].values, width, label='avg_domain', alpha=0.85)
+
+        axes[0, 2].set_xlabel('Niveau de difficulté')
+        axes[0, 2].set_ylabel('Valeur moyenne')
+        axes[0, 2].set_title('Moyennes par niveau')
+        axes[0, 2].set_xticks(x)
+        axes[0, 2].set_xticklabels(level_summary.index, rotation=45)
+        axes[0, 2].legend()
+
+        # Option : supprimer les 3 axes vides de la 2e ligne si tu ne t’en sers pas ici
+        fig.delaxes(axes[1, 0])
+        fig.delaxes(axes[1, 1])
+        fig.delaxes(axes[1, 2])
+
+        plt.tight_layout(rect=[0, 0, 1, 0.96])  # éviter le chevauchement avec le suptitle
         plt.show()
     
     def show_sample_grids(self, n_samples: int = 3) -> None:
