@@ -27,7 +27,7 @@ python main.py
 ```bash
 jupyter notebook sudoku_experiments.ipynb
 ```
-## Structure (rôle de chaque fichier)
+## Structure 
 
 - `main.py` — Point d’entrée/CLI : charge la grille, sélectionne l’heuristique, lance GBFS, affiche métriques.
 - `gbfs_solver.py` — Moteur GBFS : file de priorité, expansion d’états valides, critères d’arrêt.
