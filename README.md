@@ -1,25 +1,32 @@
 # Sudoku Solver — Heuristic Search (GBFS)
 
-Résolution de Sudoku 9×9 par **Greedy Best-First Search** guidé par des **heuristiques** (cases vides, somme des domaines, combinaison pondérée), génération de successeurs **valides** et choix de variable **MRV**. Objectif : comparer le guidage heuristique (succès, nœuds explorés, temps).
+Résolution de grilles de Sudoku de taille 9×9 par **Greedy Best-First Search** en utilisant plusieurs fonctions heuristiques (cases vides, somme des domaines, combinaison pondérée).
 
-## Installation
+L'objectif du projet est de comparer l'impact de chaque heuristique sur les performances de l'algorithme (temps d'exécution, nombre d'états explorés, taille maximale de la file ouverte, taux de réussite).
+
+## Installation du projet 
 ```bash
 git clone https://github.com/salmalys/sudoku-solver.git
 cd sudoku-solver
+
+# Création d'un environnement virtuel 
 python -m venv .venv
 # macOS/Linux
 source .venv/bin/activate
 # Windows
 .\.venv\Scripts\activate
+
+# Installation des librairies nécessaires 
 pip install -r requirements.txt
-
-python main.py        # exécution par défaut
-python main.py -h     # aide (choix d’heuristique, seed, chemin de grille, etc.)
 ```
-
+Pour tester la résolution des grilles de Sudoku, un script interactif peut être lancé pour choisir l’heuristique, le niveau de difficulté de la grille, etc..
+````bash
+python main.py        
+```
 ## Notebook d’expériences
+```bash
 jupyter notebook sudoku_experiments.ipynb
-
+```
 ## Structure (rôle de chaque fichier)
 
 - `main.py` — Point d’entrée/CLI : charge la grille, sélectionne l’heuristique, lance GBFS, affiche métriques.
